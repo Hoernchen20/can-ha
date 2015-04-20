@@ -1,0 +1,4 @@
+#Ausgabedateien ignorieren
+*.o
+*.gch
+*.a
