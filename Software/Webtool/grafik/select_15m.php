@@ -11,13 +11,13 @@
                 messwert_archiv_15m.avg,
                 messwert_archiv_15m.max,
                 messwert.einheit,
-                DATE_FORMAT(messwert_archiv_1h.zeitstempel, \'%Y, %m-1, %e, %k, %i\') AS zeit
+                DATE_FORMAT(messwert_archiv_15m.zeitstempel, \'%Y, %m-1, %e, %k, %i\') AS zeit
               FROM
                 messwert_archiv_15m
               INNER JOIN
                 messwert ON messwert_archiv_15m.messwert_id = messwert.id
               WHERE messwert_archiv_15m.zeitstempel >= DATE_SUB(NOW(), INTERVAL ' . ($get_interval+1) . ' HOUR)
-                AND messwert_archiv_15m.messwert_id = ' . $get_messwert_id . ' ORDER BY messwert_archiv_1h.id';
+                AND messwert_archiv_15m.messwert_id = ' . $get_messwert_id . ' ORDER BY messwert_archiv_15m.id';
 
     $result = mysqli_query($db, $query);
     mysqli_close($db);
