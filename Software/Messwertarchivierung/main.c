@@ -241,7 +241,10 @@ void insert_archiv_1h(void) {
                     "DATE_FORMAT(messwert_archiv.zeitstempel, '%%Y-%%m-%%d %%k:00:00') "
                   "FROM "
                     "messwert_archiv "
+                  "JOIN "
+                    "messwert ON messwert_archiv.messwert_id = messwert.id "
                     "WHERE EXTRACT(DAY_HOUR FROM messwert_archiv.zeitstempel) = EXTRACT(DAY_HOUR FROM (NOW() - INTERVAL 1 HOUR)) "
+                    "AND messwert.archiv_level >= 3 "
                     "GROUP BY messwert_archiv.messwert_id");
 
   /*
