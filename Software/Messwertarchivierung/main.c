@@ -215,7 +215,10 @@ void insert_archiv_15m(void) {
                     "DATE_FORMAT(messwert_archiv.zeitstempel, '%%Y-%%m-%%d %%k:%%i:00') "
                   "FROM "
                     "messwert_archiv "
+                  "JOIN "
+                    "messwert ON messwert_archiv.messwert_id = messwert.id "
                     "WHERE EXTRACT(DAY_MINUTE FROM messwert_archiv.zeitstempel) >= EXTRACT(DAY_MINUTE FROM (NOW() - INTERVAL 15 MINUTE)) "
+                    "AND messwert.archiv_level >= 2 "
                     "GROUP BY messwert_archiv.messwert_id");
 
   /*
