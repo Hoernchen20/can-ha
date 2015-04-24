@@ -117,7 +117,7 @@ void insert_archiv_1m(void)
                     "(SELECT meldung.prioritaet "
                       "FROM meldung "
                       "WHERE meldung.id = messwert.warnung_meldung_id) AS prioritaet_warnung, "
-                  "FROM messwert WHERE 1"
+                  "FROM messwert "
                     "WHERE messwert.archiv_level >= 1");
 
   mysql_real_query(my, query, strlen(query));
@@ -175,7 +175,7 @@ void insert_archiv_1m(void)
   for (i = 0; i <= num_rows; i++) {
     /*
      *  Ist der Messwert innerhalb der Grenzwerte und das Archiv-Level größer null, dann Messwerte in das Archiv einfügen */
-    if ( (akt_messwert[i] >= grenze_unten[i]) & (akt_messwert[i] <= grenze_oben[i]) & (archiv_level[i] > 0) ) {
+    if ( (akt_messwert[i] >= grenze_unten[i]) & (akt_messwert[i] <= grenze_oben[i]) ) {
       char tmp_str[100];
       sprintf (tmp_str, "(%u,%.3f, NOW()),", messwert_id[i], akt_messwert[i]);
       strcat(insert_query, tmp_str);
