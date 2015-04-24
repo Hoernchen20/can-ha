@@ -117,8 +117,8 @@ void insert_archiv_1m(void)
                     "(SELECT meldung.prioritaet "
                       "FROM meldung "
                       "WHERE meldung.id = messwert.warnung_meldung_id) AS prioritaet_warnung, "
-                    "messwert.archiv_level "
-                 "FROM messwert WHERE 1");
+                  "FROM messwert WHERE 1"
+                    "WHERE messwert.archiv_level >= 1");
 
   mysql_real_query(my, query, strlen(query));
   db_check_error();
@@ -143,7 +143,6 @@ void insert_archiv_1m(void)
   char         warnung_status[num_rows];
   char         grenze_prioritaet[num_rows];
   char         warnung_prioritaet[num_rows];
-  char         archiv_level[num_rows];
 
   /*
    * Daten der Abfrage in das Array kopieren. Die Variable "num_rows"
@@ -163,7 +162,6 @@ void insert_archiv_1m(void)
     warnung_status[num_rows] = atoi(row[9]);
     grenze_prioritaet[num_rows] = atoi(row[10]);
     warnung_prioritaet[num_rows] = atoi(row[11]);
-    archiv_level[num_rows] = atoi(row[12]);
 
     num_rows++;
   }
