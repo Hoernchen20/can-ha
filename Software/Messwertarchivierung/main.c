@@ -116,7 +116,7 @@ void insert_archiv_1m(void)
                       "WHERE meldung.id = messwert.grenze_meldung_id) AS prioritaet_grenze, "
                     "(SELECT meldung.prioritaet "
                       "FROM meldung "
-                      "WHERE meldung.id = messwert.warnung_meldung_id) AS prioritaet_warnung, "
+                      "WHERE meldung.id = messwert.warnung_meldung_id) AS prioritaet_warnung "
                   "FROM messwert "
                     "WHERE messwert.archiv_level >= 1");
 
