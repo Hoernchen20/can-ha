@@ -264,17 +264,20 @@ void insert_archiv_1d(void) {
   char query[1024];
 
   sprintf(query, "INSERT INTO "
-                   "messwert_archiv_1d (messwert_id, min, max, avg, datum) "
-                "SELECT "
-                   "messwert_archiv_1h.messwert_id, "
-                   "MIN(messwert_archiv_1h.min), "
-                   "MAX(messwert_archiv_1h.max), "
-                   "ROUND(AVG( messwert_archiv_1h.avg ), 3), "
-                   "DATE(messwert_archiv_1h.zeitstempel) "
-                "FROM "
-                   "messwert_archiv_1h "
-                   "WHERE DATE(messwert_archiv_1h.zeitstempel) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) "
-                   "GROUP BY messwert_archiv_1h.messwert_id");
+                    "messwert_archiv_1d (messwert_id, min, max, avg, datum) "
+                  "SELECT "
+                    "messwert_archiv_1h.messwert_id, "
+                    "MIN(messwert_archiv_1h.min), "
+                    "MAX(messwert_archiv_1h.max), "
+                    "ROUND(AVG( messwert_archiv_1h.avg ), 3), "
+                    "DATE(messwert_archiv_1h.zeitstempel) "
+                  "FROM "
+                    "messwert_archiv_1h "
+                  "JOIN "
+                    "messwert ON messwert_archiv_1h.messwert_id = messwert.id "
+                    "WHERE DATE(messwert_archiv_1h.zeitstempel) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) "
+                    "AND messwert.archiv_level >= 4 "
+                    "GROUP BY messwert_archiv_1h.messwert_id");
 
   /*
    * Query bei Bedarf auf der Kommandozeile ausgeben */
