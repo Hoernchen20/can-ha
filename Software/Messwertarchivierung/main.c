@@ -172,9 +172,9 @@ void insert_archiv_1m(void)
                           "messwert_archiv (messwert_id, wert, zeitstempel) "
                         "VALUES ");
 
-  for (i = 0; i <= num_rows; i++) {
+  for (i = 0; i < num_rows; i++) {
     /*
-     *  Ist der Messwert innerhalb der Grenzwerte und das Archiv-Level größer null, dann Messwerte in das Archiv einfügen */
+     *  Ist der Messwert innerhalb der Grenzwerte, dann Messwerte in das Archiv einfügen */
     if ( (akt_messwert[i] >= grenze_unten[i]) & (akt_messwert[i] <= grenze_oben[i]) ) {
       char tmp_str[100];
       sprintf (tmp_str, "(%u,%.3f, NOW()),", messwert_id[i], akt_messwert[i]);
