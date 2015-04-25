@@ -116,9 +116,9 @@ void insert_archiv_1m(void)
                       "WHERE meldung.id = messwert.grenze_meldung_id) AS prioritaet_grenze, "
                     "(SELECT meldung.prioritaet "
                       "FROM meldung "
-                      "WHERE meldung.id = messwert.warnung_meldung_id) AS prioritaet_warnung, "
-                    "messwert.archiv_level "
-                 "FROM messwert WHERE 1");
+                      "WHERE meldung.id = messwert.warnung_meldung_id) AS prioritaet_warnung "
+                  "FROM messwert "
+                    "WHERE messwert.archiv_level >= 1");
 
   mysql_real_query(my, query, strlen(query));
   db_check_error();
@@ -143,7 +143,6 @@ void insert_archiv_1m(void)
   char         warnung_status[num_rows];
   char         grenze_prioritaet[num_rows];
   char         warnung_prioritaet[num_rows];
-  char         archiv_level[num_rows];
 
   /*
    * Daten der Abfrage in das Array kopieren. Die Variable "num_rows"
@@ -163,7 +162,6 @@ void insert_archiv_1m(void)
     warnung_status[num_rows] = atoi(row[9]);
     grenze_prioritaet[num_rows] = atoi(row[10]);
     warnung_prioritaet[num_rows] = atoi(row[11]);
-    archiv_level[num_rows] = atoi(row[12]);
 
     num_rows++;
   }
@@ -174,10 +172,10 @@ void insert_archiv_1m(void)
                           "messwert_archiv (messwert_id, wert, zeitstempel) "
                         "VALUES ");
 
-  for (i = 0; i <= num_rows; i++) {
+  for (i = 0; i < num_rows; i++) {
     /*
-     *  Ist der Messwert innerhalb der Grenzwerte und das Archiv-Level größer null, dann Messwerte in das Archiv einfügen */
-    if ( (akt_messwert[i] >= grenze_unten[i]) & (akt_messwert[i] <= grenze_oben[i]) & (archiv_level[i] > 0) ) {
+     *  Ist der Messwert innerhalb der Grenzwerte, dann Messwerte in das Archiv einfügen */
+    if ( (akt_messwert[i] >= grenze_unten[i]) & (akt_messwert[i] <= grenze_oben[i]) ) {
       char tmp_str[100];
       sprintf (tmp_str, "(%u,%.3f, NOW()),", messwert_id[i], akt_messwert[i]);
       strcat(insert_query, tmp_str);
@@ -215,7 +213,10 @@ void insert_archiv_15m(void) {
                     "DATE_FORMAT(messwert_archiv.zeitstempel, '%%Y-%%m-%%d %%k:%%i:00') "
                   "FROM "
                     "messwert_archiv "
+                  "JOIN "
+                    "messwert ON messwert_archiv.messwert_id = messwert.id "
                     "WHERE EXTRACT(DAY_MINUTE FROM messwert_archiv.zeitstempel) >= EXTRACT(DAY_MINUTE FROM (NOW() - INTERVAL 15 MINUTE)) "
+                    "AND messwert.archiv_level >= 2 "
                     "GROUP BY messwert_archiv.messwert_id");
 
   /*
@@ -241,7 +242,10 @@ void insert_archiv_1h(void) {
                     "DATE_FORMAT(messwert_archiv.zeitstempel, '%%Y-%%m-%%d %%k:00:00') "
                   "FROM "
                     "messwert_archiv "
+                  "JOIN "
+                    "messwert ON messwert_archiv.messwert_id = messwert.id "
                     "WHERE EXTRACT(DAY_HOUR FROM messwert_archiv.zeitstempel) = EXTRACT(DAY_HOUR FROM (NOW() - INTERVAL 1 HOUR)) "
+                    "AND messwert.archiv_level >= 3 "
                     "GROUP BY messwert_archiv.messwert_id");
 
   /*
@@ -258,17 +262,20 @@ void insert_archiv_1d(void) {
   char query[1024];
 
   sprintf(query, "INSERT INTO "
-                   "messwert_archiv_1d (messwert_id, min, max, avg, datum) "
-                "SELECT "
-                   "messwert_archiv_1h.messwert_id, "
-                   "MIN(messwert_archiv_1h.min), "
-                   "MAX(messwert_archiv_1h.max), "
-                   "ROUND(AVG( messwert_archiv_1h.avg ), 3), "
-                   "DATE(messwert_archiv_1h.zeitstempel) "
-                "FROM "
-                   "messwert_archiv_1h "
-                   "WHERE DATE(messwert_archiv_1h.zeitstempel) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) "
-                   "GROUP BY messwert_archiv_1h.messwert_id");
+                    "messwert_archiv_1d (messwert_id, min, max, avg, datum) "
+                  "SELECT "
+                    "messwert_archiv_1h.messwert_id, "
+                    "MIN(messwert_archiv_1h.min), "
+                    "MAX(messwert_archiv_1h.max), "
+                    "ROUND(AVG( messwert_archiv_1h.avg ), 3), "
+                    "DATE(messwert_archiv_1h.zeitstempel) "
+                  "FROM "
+                    "messwert_archiv_1h "
+                  "JOIN "
+                    "messwert ON messwert_archiv_1h.messwert_id = messwert.id "
+                    "WHERE DATE(messwert_archiv_1h.zeitstempel) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) "
+                    "AND messwert.archiv_level >= 4 "
+                    "GROUP BY messwert_archiv_1h.messwert_id");
 
   /*
    * Query bei Bedarf auf der Kommandozeile ausgeben */
