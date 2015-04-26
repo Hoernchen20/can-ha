@@ -24,8 +24,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include "db_connect.c"
 
+/* Defines ************************************************************/
 #define AUSGABE 0
 #define OK 0
 #define ERROR 1
@@ -35,6 +37,9 @@ void insert_archiv_1m(void);
 void insert_archiv_15m(void);
 void insert_archiv_1h(void);
 void insert_archiv_1d(void);
+void delete_archiv_1m(void);
+void delete_archiv_15m(void);
+void delete_archiv_1h(void);
 
 /* Hauptprogramm ******************************************************/
 int main(int argc, char **argv)
@@ -73,9 +78,14 @@ int main(int argc, char **argv)
 
   /*
    * Jede Tag Min, Max und Avg der Messwerte aus der Tabelle
-   * "messwert_archiv_1h" in die Tabelle "messwert_archiv_1d" kopieren */
+   * "messwert_archiv_1h" in die Tabelle "messwert_archiv_1d" kopieren
+   * und alte Messwerte in den Tabellen "messwert_archiv",
+   * "messwert_archiv_15m" und "messswert_archiv_1h" löschen */
   if ( (ts->tm_hour == 0) & (ts->tm_min == 1) ) {
     insert_archiv_1d();
+    delete_archiv_1m();
+    delete_archiv_15m();
+    delete_archiv_1h();
   }
 
   /*
@@ -285,4 +295,58 @@ void insert_archiv_1d(void) {
 
   mysql_real_query(my, query, strlen(query));
   db_check_error();
+}
+
+void delete_archiv_1m(void) {
+  char query[128];
+  int error_counter = 0;
+
+  sprintf(query, "DELETE FROM "
+                     "messwert_archiv "
+                   "WHERE DATE(messwert_archiv.zeitstempel) < DATE(DATE_SUB(NOW(), INTERVAL 14 DAY))");
+
+  while (mysql_real_query(my, query, strlen(query))) {
+    db_check_error();
+    error_counter++;
+    if (error_counter > 2) {
+        break;
+    }
+    sleep(1);
+  }
+}
+
+void delete_archiv_15m(void) {
+  char query[128];
+  int error_counter = 0;
+
+  sprintf(query, "DELETE FROM "
+                     "messwert_archiv_15m "
+                   "WHERE DATE(messwert_archiv_15m.zeitstempel) < DATE(DATE_SUB(NOW(), INTERVAL 42 DAY))");
+
+  while (mysql_real_query(my, query, strlen(query))) {
+    db_check_error();
+    error_counter++;
+    if (error_counter > 2) {
+        break;
+    }
+    sleep(1);
+  }
+}
+
+void delete_archiv_1h(void) {
+  char query[128];
+  int error_counter = 0;
+
+  sprintf(query, "DELETE FROM "
+                     "messwert_archiv_1h "
+                   "WHERE DATE(messwert_archiv_1h.zeitstempel) < DATE(DATE_SUB(NOW(), INTERVAL 90 DAY))");
+
+  while (mysql_real_query(my, query, strlen(query))) {
+    db_check_error();
+    error_counter++;
+    if (error_counter > 2) {
+        break;
+    }
+    sleep(1);
+  }
 }
